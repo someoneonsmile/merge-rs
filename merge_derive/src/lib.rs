@@ -24,12 +24,12 @@ struct Field {
 #[derive(Default)]
 struct FieldAttrs {
     skip: bool,
-    strategy: Option<syn::Path>,
+    strategy: Option<syn::Expr>,
 }
 
 enum FieldAttr {
     Skip,
-    Strategy(syn::Path),
+    Strategy(syn::Expr),
 }
 
 #[proc_macro_derive(Merge, attributes(merge))]
@@ -118,7 +118,7 @@ impl FieldAttrs {
     fn apply(&mut self, attr: FieldAttr) {
         match attr {
             FieldAttr::Skip => self.skip = true,
-            FieldAttr::Strategy(path) => self.strategy = Some(path),
+            FieldAttr::Strategy(expr) => self.strategy = Some(expr),
         }
     }
 }
@@ -150,8 +150,8 @@ impl syn::parse::Parse for FieldAttr {
             Ok(FieldAttr::Skip)
         } else if name == "strategy" {
             let _: Token![=] = input.parse()?;
-            let path: syn::Path = input.parse()?;
-            Ok(FieldAttr::Strategy(path))
+            let expr: syn::Expr = input.parse()?;
+            Ok(FieldAttr::Strategy(expr))
         } else {
             abort!(name, "Unexpected attribute: {}", name)
         }
