@@ -181,6 +181,20 @@ pub mod option {
             }
         }
     }
+
+    /// If both `left` and `right` are `Some`, recursively strategy merge the two.
+    /// Otherwise, fall back to `overwrite_none`.
+    pub fn with_recurse_strategy<T>(f: fn(&mut T, T)) -> impl Fn(&mut Option<T>, Option<T>) {
+        move |left: &mut Option<T>, right: Option<T>| {
+            if let Some(new) = right {
+                if let Some(original) = left {
+                    f(original, new);
+                } else {
+                    *left = Some(new);
+                }
+            }
+        }
+    }
 }
 
 /// Merge strategies for boolean types.
